@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Special Surprise For You</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        rose: {
+                            50: '#fff1f2',
+                            100: '#ffe4e6',
+                            200: '#fecdd3',
+                            300: '#fda4af',
+                            400: '#fb7185',
+                            500: '#f43f5e',
+                            600: '#e11d48',
+                            700: '#be123c',
+                            800: '#9f1239',
+                            900: '#881337',
+                        },
+                        amber: {
+                            50: '#fffbeb',
+                            100: '#fef3c7',
+                            200: '#fde68a',
+                        }
+                    },
+                    fontFamily: {
+                        serif: ['Playfair Display', 'Georgia', 'serif'],
+                        sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+                        handwriting: ['Dancing Script', 'cursive']
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'float-delayed': 'float 7s ease-in-out 3s infinite',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'glow': 'glow 2s ease-in-out infinite alternate',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px) rotate(0deg)' },
+                            '50%': { transform: 'translateY(-20px) rotate(5deg)' },
+                        },
+                        glow: {
+                            '0%': { boxShadow: '0 0 15px rgba(244, 63, 94, 0.3)' },
+                            '100%': { boxShadow: '0 0 30px rgba(244, 63, 94, 0.7)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Playfair+Display:ital,wght@0,500;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e112a 50%, #2d1222 100%);
+            color: #f8fafc;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .font-serif-title {
+            font-family: 'Playfair Display', serif;
+        }
+
+        .font-handwriting {
+            font-family: 'Dancing Script', cursive;
+        }
+
+        /* Floating Particles Layer */
+        .heart-particle {
+            position: fixed;
+            pointer-events: none;
+            z-index: 10;
+            animation: floatUp 8s linear infinite;
+            opacity: 0;
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(100vh) scale(0.5) rotate(0deg);
+                opacity: 0;
+            }
+            20% {
+                opacity: 0.8;
+            }
+            80% {
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateY(-10vh) scale(1.2) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .glass-card-hover {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card-hover:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(251, 113, 133, 0.4);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 30px -10px rgba(225, 29, 72, 0.15);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.8);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(244, 63, 94, 0.4);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(244, 63, 94, 0.7);
+        }
+    </style>
+</head>
+<body class="relative min-h-screen text-slate-100 selection:bg-rose-500 selection:text-white">
+
+    <!-- Floating Background Particles Container -->
+    <div id="particles-container" class="fixed inset-0 pointer-events-none z-0 overflow-hidden"></div>
+
+    <!-- Top Floating Controls Header -->
+    <header class="fixed top-0 left-0 right-0 z-40 p-4 sm:p-6 flex justify-between items-center backdrop-blur-md bg-slate-950/30 border-b border-white/5">
+        <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+            <span class="text-xs uppercase tracking-widest text-rose-300 font-medium">A Love Story Begins</span>
+        </div>
+        
+        <div class="flex items-center gap-3">
+            <!-- Audio Toggle Button -->
+            <button id="audio-toggle-btn" class="flex items-center gap-2 px-3 py-1.5 rounded-full glass-card hover:bg-white/10 text-xs sm:text-sm text-rose-200 transition-all border border-rose-500/20">
+                <i data-lucide="music" class="w-4 h-4 text-rose-400"></i>
+                <span id="audio-status-text">Play Melody</span>
+            </button>
+            
+            <!-- Customize Toggle Button -->
+            <button id="customizer-open-btn" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-rose-600/20 hover:bg-rose-600/30 text-xs sm:text-sm text-rose-200 transition-all border border-rose-500/30">
+                <i data-lucide="sliders" class="w-4 h-4 text-rose-400"></i>
+                <span class="hidden sm:inline">Customize</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN APP CONTENT CONTAINER -->
+    <main class="relative z-20 max-w-4xl mx-auto px-4 pt-28 pb-20 space-y-16 sm:space-y-24">
+
+        <!-- HERO / INTRO SECTION -->
+        <section class="text-center space-y-6 pt-6">
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card text-rose-300 text-sm mb-2 animate-bounce">
+                <i data-lucide="sparkles" class="w-4 h-4 text-rose-400 fill-rose-400"></i>
+                <span>She Said Yes!</span>
+            </div>
+
+            <h1 class="text-4xl sm:text-6xl md:text-7xl font-serif-title font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-rose-200 via-rose-300 to-amber-100 leading-tight">
+                To My Amazing <br class="hidden sm:block">
+                <span id="display-gf-name" class="font-handwriting text-rose-400 font-normal text-5xl sm:text-7xl md:text-8xl italic drop-shadow-lg">Olivia❤️</span>
+            </h1>
+
+            <p class="text-base sm:text-xl text-slate-300/90 max-w-2xl mx-auto font-light leading-relaxed px-4">
+                "You saying YES turned an ordinary day into the most unforgettable moment of my life. I made this private page just for you to show you how excited, grateful, and happy I am that we are starting this together!"
+            </p>
+
+            <div class="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
+                <a href="#coupons-section" class="w-full sm:w-auto px-8 py-3.5 rounded-full bg-gradient-to-r from-rose-600 to-rose-500 text-white font-medium hover:from-rose-500 hover:to-rose-400 shadow-lg shadow-rose-900/40 transition-all flex items-center justify-center gap-2 group">
+                    <i data-lucide="ticket" class="w-4 h-4"></i>
+                    <span>Claim Your Coupons</span>
+                </a>
+                <a href="#letter-section" class="w-full sm:w-auto px-8 py-3.5 rounded-full glass-card hover:bg-white/10 text-rose-200 font-medium transition-all flex items-center justify-center gap-2 border border-rose-500/20">
+                    <span>Read My Letter</span>
+                    <i data-lucide="arrow-down" class="w-4 h-4"></i>
+                </a>
+            </div>
+        </section>
+
+        <!-- CORE CELEBRATION BANNER -->
+        <section class="relative p-8 sm:p-10 rounded-3xl glass-card border-rose-500/20 text-center space-y-6 overflow-hidden">
+            <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-rose-600/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -left-10 -top-10 w-48 h-48 bg-purple-600/10 rounded-full blur-3xl pointer-events-none"></div>
+
+            <i data-lucide="heart" class="w-10 h-10 text-rose-400 mx-auto animate-pulse"></i>
+
+            <h2 class="text-2xl sm:text-3xl font-serif-title text-rose-100 font-semibold leading-snug">
+                "Thank you for accepting my request. Having you in my life feels like a dream I never want to wake up from."
+            </h2>
+
+            <p class="text-slate-300 text-sm sm:text-base leading-relaxed max-w-xl mx-auto">
+                I promise to make every day brighter, keep a smile on your face, and cherish every single moment we share together.
+            </p>
+        </section>
+
+        <!-- INTERACTIVE STORY & PROMISE CARDS -->
+        <section id="story-section" class="space-y-8">
+            <div class="text-center space-y-2">
+                <h3 class="text-xs uppercase tracking-widest text-rose-400 font-semibold">Our Journey</h3>
+                <h2 class="text-3xl sm:text-4xl font-serif-title font-bold text-slate-100">Why You're So Special</h2>
+            </div>
+
+            <div class="grid gap-4 sm:gap-6">
+                <!-- Card 1 -->
+                <div class="glass-card glass-card-hover rounded-2xl p-6 sm:p-8 cursor-pointer transition-all duration-300 accordion-card" onclick="toggleCard(this)">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400">
+                                <i data-lucide="party-popper" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold text-rose-100">The Moment You Said Yes</h4>
+                                <p class="text-xs text-rose-300/80">Click to expand</p>
+                            </div>
+                        </div>
+                        <i data-lucide="chevron-down" class="w-5 h-5 text-slate-400 transition-transform duration-300 card-icon"></i>
+                    </div>
+                    <div class="card-content hidden mt-6 pt-6 border-t border-white/10 text-slate-300 text-sm sm:text-base space-y-3 leading-relaxed">
+                        <p id="display-story-text">
+                            I was so nervous before asking, but the moment you gave me your response, my heart raced in the best way possible. Knowing that you chose to give us a chance means more to me than I can ever put into words.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="glass-card glass-card-hover rounded-2xl p-6 sm:p-8 cursor-pointer transition-all duration-300 accordion-card" onclick="toggleCard(this)">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400">
+                                <i data-lucide="smile" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold text-rose-100">What I Love About You</h4>
+                                <p class="text-xs text-rose-300/80">Click to expand</p>
+                            </div>
+                        </div>
+                        <i data-lucide="chevron-down" class="w-5 h-5 text-slate-400 transition-transform duration-300 card-icon"></i>
+                    </div>
+                    <div class="card-content hidden mt-6 pt-6 border-t border-white/10 text-slate-300 text-sm sm:text-base space-y-3 leading-relaxed">
+                        <p id="display-value-text">
+                            From your incredible energy to the sweet way you communicate, everything about you is infectious. You make conversations effortless and bring a warmth that makes me feel completely at home.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="glass-card glass-card-hover rounded-2xl p-6 sm:p-8 cursor-pointer transition-all duration-300 accordion-card" onclick="toggleCard(this)">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400">
+                                <i data-lucide="shield-check" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold text-rose-100">My Guarantees To You</h4>
+                                <p class="text-xs text-rose-300/80">Click to expand</p>
+                            </div>
+                        </div>
+                        <i data-lucide="chevron-down" class="w-5 h-5 text-slate-400 transition-transform duration-300 card-icon"></i>
+                    </div>
+                    <div class="card-content hidden mt-6 pt-6 border-t border-white/10 text-slate-300 text-sm sm:text-base space-y-3 leading-relaxed">
+                        <ul class="list-disc list-inside space-y-2 text-slate-300">
+                            <li>To always respect your feelings, thoughts, and personal boundaries.</li>
+                            <li>To keep our relationship full of laughter, fun dates, and endless surprises.</li>
+                            <li>To always be honest, supportive, and your biggest cheerleader in everything you do.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SPECIAL SECTION: INTERACTIVE LOVE COUPONS -->
+        <section id="coupons-section" class="space-y-8">
+            <div class="text-center space-y-2">
+                <h3 class="text-xs uppercase tracking-widest text-rose-400 font-semibold">Gifts Just For You</h3>
+                <h2 class="text-3xl sm:text-4xl font-serif-title font-bold text-slate-100">Your Exclusive Love Coupons</h2>
+                <p class="text-slate-400 text-xs sm:text-sm max-w-md mx-auto">
+                    Click "Redeem Coupon" on any favor below to claim it anytime you want!
+                </p>
+            </div>
+
+            <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Coupon 1 -->
+                <div class="glass-card p-6 rounded-2xl border-rose-500/30 flex flex-col justify-between space-y-4 relative overflow-hidden group hover:border-rose-400 transition-all">
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-start">
+                            <span class="text-[10px] uppercase font-bold tracking-widest px-2.5 py-1 rounded-full bg-rose-500/20 text-rose-300">VIP Pass</span>
+                            <i data-lucide="utensils" class="w-5 h-5 text-rose-400"></i>
+                        </div>
+                        <h4 class="text-lg font-serif-title font-bold text-rose-100">Dinner Date Of Your Choice</h4>
+                        <p class="text-xs text-slate-300">You pick any restaurant, cuisine, or place, and the entire night is on me. No questions asked!</p>
+                    </div>
+                    <button onclick="redeemCoupon('Dinner Date Of Your Choice')" class="coupon-btn w-full py-2.5 rounded-xl bg-rose-600/30 hover:bg-rose-600 text-rose-200 hover:text-white font-medium text-xs border border-rose-500/30 transition-all flex items-center justify-center gap-1.5">
+                        <i data-lucide="gift" class="w-4 h-4"></i>
+                        <span>Redeem Coupon</span>
+                    </button>
+                </div>
+
+                <!-- Coupon 2 -->
+                <div class="glass-card p-6 rounded-2xl border-rose-500/30 flex flex-col justify-between space-y-4 relative overflow-hidden group hover:border-rose-400 transition-all">
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-start">
+                            <span class="text-[10px] uppercase font-bold tracking-widest px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-300">Unlimited</span>
+                            <i data-lucide="clapperboard" class="w-5 h-5 text-amber-400"></i>
+                        </div>
+                        <h4 class="text-lg font-serif-title font-bold text-rose-100">Cozy Movie & Snack Night</h4>
+                        <p class="text-xs text-slate-300">You control the remote, pick the movies, and I provide all your favorite snacks and treats.</p>
+                    </div>
+                    <button onclick="redeemCoupon('Cozy Movie & Snack Night')" class="coupon-btn w-full py-2.5 rounded-xl bg-rose-600/30 hover:bg-rose-600 text-rose-200 hover:text-white font-medium text-xs border border-rose-500/30 transition-all flex items-center justify-center gap-1.5">
+                        <i data-lucide="gift" class="w-4 h-4"></i>
+                        <span>Redeem Coupon</span>
+                    </button>
+                </div>
+
+                <!-- Coupon 3 -->
+                <div class="glass-card p-6 rounded-2xl border-rose-500/30 flex flex-col justify-between space-y-4 relative overflow-hidden group hover:border-rose-400 transition-all">
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-start">
+                            <span class="text-[10px] uppercase font-bold tracking-widest px-2.5 py-1 rounded-full bg-purple-500/20 text-purple-300">Wildcard</span>
+                            <i data-lucide="sparkles" class="w-5 h-5 text-purple-400"></i>
+                        </div>
+                        <h4 class="text-lg font-serif-title font-bold text-rose-100">One Instant Wish</h4>
+                        <p class="text-xs text-slate-300">Redeem this coupon for whatever favor, surprise, or plan you want right now.</p>
+                    </div>
+                    <button onclick="redeemCoupon('One Instant Wish')" class="coupon-btn w-full py-2.5 rounded-xl bg-rose-600/30 hover:bg-rose-600 text-rose-200 hover:text-white font-medium text-xs border border-rose-500/30 transition-all flex items-center justify-center gap-1.5">
+                        <i data-lucide="gift" class="w-4 h-4"></i>
+                        <span>Redeem Coupon</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- UNSEAL HEART LETTER TRIGGER SECTION -->
+        <section id="letter-section" class="text-center space-y-6 pt-6">
+            <div class="p-8 sm:p-12 rounded-3xl bg-gradient-to-b from-rose-900/20 to-slate-900/80 border border-rose-500/30 shadow-2xl space-y-6 relative overflow-hidden">
+                <i data-lucide="mail-open" class="w-12 h-12 text-rose-400 mx-auto animate-pulse"></i>
+                <h3 class="text-2xl sm:text-3xl font-serif-title font-bold text-rose-100">A Personal Note Just For You</h3>
+                <p class="text-sm sm:text-base text-slate-300 max-w-md mx-auto">
+                    I wrote down every thought and excitement in my heart. Click below to unseal your secret letter.
+                </p>
+                <button onclick="openLetterModal()" class="px-8 py-4 rounded-full bg-rose-500 hover:bg-rose-600 text-white font-medium shadow-lg shadow-rose-600/30 transition-all transform hover:scale-105 inline-flex items-center gap-2">
+                    <i data-lucide="heart" class="w-5 h-5 fill-white"></i>
+                    <span>Open Special Letter</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- LIVE RESPONSE FORM SECTION (WEB3FORMS CONNECTED) -->
+        <section id="response-form-section" class="max-w-xl mx-auto space-y-6 pt-6">
+            <div class="p-8 sm:p-10 rounded-3xl glass-card border border-rose-500/30 shadow-2xl text-center space-y-6">
+                <i data-lucide="message-circle" class="w-10 h-10 text-rose-400 mx-auto"></i>
+                <div class="space-y-2">
+                    <h3 class="text-2xl font-serif-title font-bold text-rose-100">Send Me A Note</h3>
+                    <p class="text-sm text-slate-300">Want to tell me something sweet or redeem a coupon? Leave a message here:</p>
+                </div>
+
+                <form id="replyForm" class="space-y-4 text-left">
+                    <!-- Web3Forms Access Key Embedded -->
+                    <input type="hidden" name="access_key" value="e3d43cf1-5e14-4df7-a640-e385749a3a21">
+                    <input type="hidden" name="subject" value="New Romantic Message Received from your Website!">
+
+                    <textarea name="message" id="form-message-input" rows="4" required placeholder="Write whatever is on your mind..." class="w-full p-4 rounded-2xl bg-slate-950/60 border border-rose-500/30 text-slate-100 text-sm placeholder-slate-400 focus:outline-none focus:border-rose-400 focus:ring-1 focus:ring-rose-400 transition-all resize-none"></textarea>
+
+                    <button type="submit" id="submitBtn" class="w-full py-4 rounded-full bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 text-white font-semibold shadow-lg shadow-rose-900/40 transition-all flex items-center justify-center gap-2">
+                        <span>Send Response 💖</span>
+                    </button>
+                </form>
+
+                <div id="status" class="text-sm transition-all"></div>
+            </div>
+        </section>
+
+        <!-- INTERACTIVE CELEBRATION / PROMPT -->
+        <section class="text-center space-y-8 pt-6 pb-10">
+            <div class="space-y-3">
+                <h2 class="text-3xl sm:text-4xl font-serif-title font-bold text-slate-100">Ready For Our First Adventure?</h2>
+                <p class="text-slate-400 text-sm max-w-md mx-auto">
+                    Let me know if you're ready to plan our first fun date together!
+                </p>
+            </div>
+
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 relative min-h-[120px]" id="celebrate-buttons-container">
+                <button id="celebrate-yes-btn" onclick="handleCelebrateYes()" class="w-full sm:w-auto px-10 py-4 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold shadow-lg shadow-emerald-900/30 transition-all transform hover:scale-105 flex items-center justify-center gap-2">
+                    <i data-lucide="sparkles" class="w-5 h-5"></i>
+                    <span>Yes, let's plan it now!</span>
+                </button>
+
+                <button id="celebrate-no-btn" onmouseover="moveNoButton(this)" onclick="moveNoButton(this)" class="w-full sm:w-auto px-8 py-4 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 text-sm transition-all border border-white/10 sm:absolute sm:right-1/4">
+                    <span>Surprise me later!</span>
+                </button>
+            </div>
+
+            <!-- Response Message Container -->
+            <div id="response-box" class="hidden p-6 rounded-2xl glass-card border-emerald-500/30 bg-emerald-950/20 max-w-lg mx-auto space-y-3 animate-fade-in">
+                <i data-lucide="heart-handshake" class="w-10 h-10 text-emerald-400 mx-auto"></i>
+                <h4 class="text-xl font-semibold text-emerald-200">Yay! I can't wait!</h4>
+                <p class="text-sm text-slate-300 leading-relaxed">
+                    I'm already counting down the hours! Send me a message or text me whenever you're free so we can lock in the details.
+                </p>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- LETTER MODAL OVERLAY -->
+    <div id="letter-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4 transition-opacity duration-300 opacity-0">
+        <div class="relative w-full max-w-2xl bg-amber-50 text-slate-800 rounded-3xl p-6 sm:p-10 shadow-2xl space-y-6 max-h-[85vh] overflow-y-auto border-4 border-amber-200">
+            <!-- Close button -->
+            <button onclick="closeLetterModal()" class="absolute top-4 right-4 w-9 h-9 rounded-full bg-amber-200/60 hover:bg-amber-300 text-slate-700 flex items-center justify-center transition-all">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+
+            <div class="text-center space-y-2 border-b border-amber-200/80 pb-4">
+                <span class="text-xs uppercase tracking-widest text-amber-800 font-semibold">From Bella's Heart To Olivia❤️</span>
+                <h3 class="text-3xl font-serif-title font-bold text-amber-950">Dear <span class="letter-gf-name font-handwriting text-4xl text-rose-700">Olivia❤️</span>,</h3>
+            </div>
+
+            <div class="space-y-4 text-base sm:text-lg text-slate-700 leading-relaxed font-serif-title italic px-2 sm:px-4" id="custom-modal-letter-body">
+                <p>
+                    I just wanted to take a moment to write this down for you. Saying YES to me wasn't just a simple answer—it meant the absolute world to me.
+                </p>
+                <p>
+                    I admire your energy, your sweetness, and how easy it is to talk to you. I promise to always treat you with the highest care, respect your feelings, and keep life fun and joyful for us.
+                </p>
+                <p>
+                    This website is just a little token of how excited I am to share amazing moments with you. I can't wait for everything ahead of us!
+                </p>
+            </div>
+
+            <div class="pt-4 border-t border-amber-200/80 text-right space-y-1">
+                <p class="text-sm text-slate-500 font-serif">With all my love,</p>
+                <p class="font-handwriting text-3xl font-bold text-rose-700" id="letter-sender-signature">Your forever Partner</p>
+                 <p class="font-handwriting text-3xl font-bold text-rose-700" id="letter-sender-signature">Bella❤️</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- CUSTOMIZATION PANEL (SLIDE-OVER) -->
+    <div id="customizer-panel" class="fixed inset-y-0 right-0 z-50 w-full max-w-md bg-slate-900 border-l border-white/10 p-6 shadow-2xl flex flex-col justify-between transform translate-x-full transition-transform duration-300">
+        <div class="space-y-6 overflow-y-auto">
+            <div class="flex items-center justify-between border-b border-white/10 pb-4">
+                <div class="flex items-center gap-2 text-rose-300 font-semibold">
+                    <i data-lucide="edit-3" class="w-5 h-5"></i>
+                    <span>Personalize This Web App</span>
+                </div>
+                <button id="customizer-close-btn" class="text-slate-400 hover:text-white p-1">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+
+            <p class="text-xs text-slate-400">
+                Tailor these details with her exact name and your personalized letter!
+            </p>
+
+            <form id="customizer-form" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">Her Name</label>
+                    <input type="text" id="input-gf-name" value="My Love" class="w-full px-3 py-2 rounded-xl bg-slate-800 border border-white/10 text-slate-100 text-sm focus:outline-none focus:border-rose-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">Your Name / Signature</label>
+                    <input type="text" id="input-sender-name" value="Your Partner" class="w-full px-3 py-2 rounded-xl bg-slate-800 border border-white/10 text-slate-100 text-sm focus:outline-none focus:border-rose-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">Custom Story / Reason</label>
+                    <textarea id="input-story-reason" rows="3" class="w-full px-3 py-2 rounded-xl bg-slate-800 border border-white/10 text-slate-100 text-sm focus:outline-none focus:border-rose-500">I was so nervous before asking, but the moment you gave me your response, my heart raced in the best way possible. Knowing that you chose to give us a chance means more to me than I can ever put into words.</textarea>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-slate-300 mb-1">Personal Letter Content</label>
+                    <textarea id="input-letter-body" rows="5" class="w-full px-3 py-2 rounded-xl bg-slate-800 border border-white/10 text-slate-100 text-sm focus:outline-none focus:border-rose-500">I just wanted to take a moment to write this down for you. Saying YES to me wasn't just a simple answer—it meant the absolute world to me.
+
+I admire your energy, your sweetness, and how easy it is to talk to you. I promise to always treat you with the highest care, respect your feelings, and keep life fun and joyful for us.
+
+This website is just a little token of how excited I am to share amazing moments with you. I can't wait for everything ahead of us!</textarea>
+                </div>
+            </form>
+        </div>
+
+        <div class="pt-4 border-t border-white/10 flex items-center gap-3">
+            <button type="button" onclick="applyCustomizations()" class="w-full py-3 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-medium text-sm transition-all">
+                Save & Apply Changes
+            </button>
+        </div>
+    </div>
+
+    <!-- AUDIO ELEMENT -->
+    <audio id="bg-music" loop preload="auto" src="audio.mp3"></audio>
+
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // Audio Player Logic
+        function toggleAudio() {
+            const bgMusic = document.getElementById('bg-music');
+            const statusText = document.getElementById('audio-status-text');
+
+            if (bgMusic) {
+                if (bgMusic.paused) {
+                    bgMusic.load(); 
+                    const playPromise = bgMusic.play();
+                    
+                    if (playPromise !== undefined) {
+                        playPromise.then(() => {
+                            if (statusText) statusText.innerText = 'Pause Melody';
+                        }).catch(error => {
+                            console.log("Audio play issue:", error);
+                        });
+                    }
+                } else {
+                    bgMusic.pause();
+                    if (statusText) statusText.innerText = 'Play Melody';
+                }
+            }
+        }
+
+        document.getElementById('audio-toggle-btn').addEventListener('click', toggleAudio);
+
+        // Mobile heart-tap trigger
+        document.addEventListener('touchstart', function initialTouch() {
+            const bgMusic = document.getElementById('bg-music');
+            if (bgMusic && bgMusic.paused) {
+                bgMusic.play().then(() => {
+                    const statusText = document.getElementById('audio-status-text');
+                    if (statusText) statusText.innerText = 'Pause Melody';
+                }).catch(() => {});
+            }
+            document.removeEventListener('touchstart', initialTouch);
+        }, { once: true });
+
+        // Floating Particles Generator
+        function createHeartParticle() {
+            const container = document.getElementById('particles-container');
+            const heart = document.createElement('div');
+            heart.classList.add('heart-particle');
+            
+            const sizes = ['12px', '16px', '20px', '24px'];
+            const colors = ['#f43f5e', '#fb7185', '#fda4af', '#e11d48', '#fecdd3', '#fde68a'];
+            const icons = ['♥️', '💖', '✨', '🌸', '💕'];
+            
+            const randomSize = sizes[Math.floor(Math.random() * sizes.length)];
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            const randomIcon = icons[Math.floor(Math.random() * icons.length)];
+            const randomLeft = Math.random() * 100;
+            const randomDuration = 6 + Math.random() * 6;
+
+            heart.style.left = `${randomLeft}vw`;
+            heart.style.fontSize = randomSize;
+            heart.style.color = randomColor;
+            heart.style.animationDuration = `${randomDuration}s`;
+            heart.innerHTML = randomIcon;
+
+            container.appendChild(heart);
+
+            setTimeout(() => {
+                heart.remove();
+            }, randomDuration * 1000);
+        }
+
+        setInterval(createHeartParticle, 600);
+        for(let i = 0; i < 8; i++) {
+            setTimeout(createHeartParticle, i * 300);
+        }
+
+        // Accordion Card Toggle Function
+        function toggleCard(cardElement) {
+            const content = cardElement.querySelector('.card-content');
+            const icon = cardElement.querySelector('.card-icon');
+            
+            const isHidden = content.classList.contains('hidden');
+
+            document.querySelectorAll('.accordion-card').forEach(card => {
+                card.querySelector('.card-content').classList.add('hidden');
+                card.querySelector('.card-icon').style.transform = 'rotate(0deg)';
+            });
+
+            if (isHidden) {
+                content.classList.remove('hidden');
+                icon.style.transform = 'rotate(180deg)';
+            }
+        }
+
+        // Redeem Coupon Functionality
+        function redeemCoupon(couponTitle) {
+            const messageInput = document.getElementById('form-message-input');
+            const formSection = document.getElementById('response-form-section');
+            
+            messageInput.value = `I want to redeem my coupon for: "${couponTitle}"! 🎟️💖`;
+            formSection.scrollIntoView({ behavior: 'smooth' });
+            messageInput.focus();
+        }
+
+        // Letter Modal Controls
+        function openLetterModal() {
+            const modal = document.getElementById('letter-modal');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+            }, 10);
+        }
+
+        function closeLetterModal() {
+            const modal = document.getElementById('letter-modal');
+            modal.classList.add('opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        // Playful No Button Logic
+        let moveCount = 0;
+        function moveNoButton(btn) {
+            if (window.innerWidth < 640) return;
+
+            moveCount++;
+            const x = (Math.random() - 0.5) * 200;
+            const y = (Math.random() - 0.5) * 100;
+            
+            btn.style.transform = `translate(${x}px, ${y}px)`;
+
+            if (moveCount > 3) {
+                btn.innerText = "Yes is better! ♥️";
+            }
+        }
+
+        function handleCelebrateYes() {
+            const buttonsContainer = document.getElementById('celebrate-buttons-container');
+            const responseBox = document.getElementById('response-box');
+
+            buttonsContainer.classList.add('hidden');
+            responseBox.classList.remove('hidden');
+
+            for(let i = 0; i < 30; i++) {
+                setTimeout(createHeartParticle, i * 60);
+            }
+        }
+
+        // Customizer Panel Controls
+        const customizerPanel = document.getElementById('customizer-panel');
+        document.getElementById('customizer-open-btn').addEventListener('click', () => {
+            customizerPanel.classList.remove('translate-x-full');
+        });
+
+        document.getElementById('customizer-close-btn').addEventListener('click', () => {
+            customizerPanel.classList.add('translate-x-full');
+        });
+
+        function applyCustomizations() {
+            const gfName = document.getElementById('input-gf-name').value.trim() || 'My Love';
+            const senderName = document.getElementById('input-sender-name').value.trim() || 'Your Partner';
+            const storyReason = document.getElementById('input-story-reason').value.trim();
+            const letterBody = document.getElementById('input-letter-body').value.trim();
+
+            document.getElementById('display-gf-name').innerText = gfName;
+            document.querySelectorAll('.letter-gf-name').forEach(el => el.innerText = gfName);
+            document.getElementById('letter-sender-signature').innerText = senderName;
+
+            if (storyReason) {
+                document.getElementById('display-story-text').innerText = storyReason;
+            }
+
+            if (letterBody) {
+                const paragraphs = letterBody.split('\n\n').map(p => `<p>${p}</p>`).join('');
+                document.getElementById('custom-modal-letter-body').innerHTML = paragraphs;
+            }
+
+            customizerPanel.classList.add('translate-x-full');
+        }
+
+        // Web3Forms Form Submission
+        const replyForm = document.getElementById('replyForm');
+        const statusDiv = document.getElementById('status');
+        const submitBtn = document.getElementById('submitBtn');
+
+        replyForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            submitBtn.disabled = true;
+            submitBtn.innerText = "Sending Message...";
+            statusDiv.className = "text-sm text-slate-300 mt-2";
+            statusDiv.innerText = "Delivering your response softly...";
+
+            const formData = new FormData(replyForm);
+            const object = Object.fromEntries(formData);
+            const json = JSON.stringify(object);
+
+            fetch('https://api.web3forms.com/submit', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: json
+            })
+            .then(async (response) => {
+                let res = await response.json();
+                if (response.status === 200) {
+                    statusDiv.className = "text-sm text-emerald-400 mt-2 font-medium";
+                    statusDiv.innerText = "Thank you! Your message has been sent directly to him 💖";
+                    replyForm.reset();
+                } else {
+                    statusDiv.className = "text-sm text-rose-400 mt-2";
+                    statusDiv.innerText = res.message || "Failed to send. Please try again.";
+                }
+            })
+            .catch(error => {
+                statusDiv.className = "text-sm text-rose-400 mt-2";
+                statusDiv.innerText = "Network error. Please try again later.";
+            })
+            .finally(() => {
+                submitBtn.disabled = false;
+                submitBtn.innerText = "Send Response 💖";
+            });
+        });
+    </script>
+</body>
+</html>
